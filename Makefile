@@ -26,7 +26,7 @@ GCC_VERSION      = 4.4.3
 GDB_VERSION      = 6.7.1
 BINUTILS_VERSION = 2.22
 NEWLIB_VERSION   = 1.16.0
-DFU_VERSION      = 0.5.4
+DFU_VERSION      = 0.5.5
 AVR_PATCH_REV	 = 3.4.0.332
 
 # Deprecated. Atmel has released the latest headers without the rev number.
@@ -93,7 +93,7 @@ AVR32HEADERS_MD5 = 4e0172ea92507c51bdb3b18eca3de2c8
 
 DFU_ARCHIVE = dfu-programmer-$(DFU_VERSION).tar.gz
 DFU_URL = http://surfnet.dl.sourceforge.net/project/dfu-programmer/dfu-programmer/$(DFU_VERSION)/$(DFU_ARCHIVE)
-DFU_MD5 = 707dcd0f957a74e92456ea6919faa772
+DFU_MD5 = 4c6d4347e740bb0383627954ea18c156
 
 
 ##### SUPPORT TOOLS VERSIONS / URLS ######
