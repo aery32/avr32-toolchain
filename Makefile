@@ -23,15 +23,11 @@
 #### PRIMARY TOOLCHAIN VERSIONS #####
 
 GCC_VERSION      = 4.4.7
-GDB_VERSION      = 6.7.1
 BINUTILS_VERSION = 2.23.1
 NEWLIB_VERSION   = 1.16.0
 DFU_VERSION      = 0.5.4
 AVR32_PATCH_REV	 = 3.4.2
-
-# Deprecated. Atmel has released the latest headers without the rev number.
-# Moreover AVR32 headers are now bundled with the AVR8 headers.
-#AVR_HEADER_REV   = 3.2.3.258
+ATMEL_HEADER_REV = 6.1.3.1475
 
 
 #### PATHS AND ENVIRONMENT VARIABLES #####
@@ -71,10 +67,6 @@ GCC_ARCHIVE = gcc-$(GCC_VERSION).tar.bz2
 GCC_URL = http://mirror.anl.gov/pub/gnu/gcc/gcc-$(GCC_VERSION)/$(GCC_ARCHIVE)
 GCC_MD5 = 295709feb4441b04e87dea3f1bab4281
 
-GDB_ARCHIVE = gdb-$(GDB_VERSION).tar.bz2
-GDB_URL = http://mirror.anl.gov/pub/gnu/gdb/$(GDB_ARCHIVE)
-GDB_MD5 = 30a6bf36eded4ae5a152d7d71b86dc14
-
 BINUTILS_ARCHIVE = binutils-$(BINUTILS_VERSION).tar.bz2
 BINUTILS_URL = http://mirror.anl.gov/pub/gnu/binutils/$(BINUTILS_ARCHIVE)
 BINUTILS_MD5 = 33adb18c3048d057ac58d07a3f1adb38
@@ -87,9 +79,9 @@ AVR32PATCHES_ARCHIVE = avr32-patches.tar.gz
 AVR32PATCHES_URL = http://distribute.atmel.no/tools/opensource/Atmel-AVR-Toolchain-$(AVR32_PATCH_REV)/avr32/$(AVR32PATCHES_ARCHIVE)
 AVR32PATCHES_MD5 = 99b2f4497d264c9200538bb1229fdef9
 
-AVR32HEADERS_ARCHIVE = avr-headers.zip
+AVR32HEADERS_ARCHIVE = atmel-headers-$(ATMEL_HEADER_REV).zip
 AVR32HEADERS_URL = http://www.atmel.com/Images/$(AVR32HEADERS_ARCHIVE)
-AVR32HEADERS_MD5 = 4e0172ea92507c51bdb3b18eca3de2c8
+AVR32HEADERS_MD5 = d69e8e188470e4fea68a4650442b5750
 
 DFU_ARCHIVE = dfu-programmer-$(DFU_VERSION).tar.gz
 DFU_URL = http://surfnet.dl.sourceforge.net/project/dfu-programmer/dfu-programmer/$(DFU_VERSION)/$(DFU_ARCHIVE)
@@ -140,12 +132,6 @@ install-note: install-tools
 	@echo
 	@echo Please be sure to add something similar to the following to your .bash_profile, .zshrc, etc:
 	@echo export PATH=$(PREFIX)/bin:'$$PATH'
-
-
-.PHONY: download-gdb
-downloads/$(GDB_ARCHIVE) download-gdb:
-	[ -d downloads ] || mkdir downloads ;
-	cd downloads && curl -LO $(GDB_URL)
 
 
 
@@ -255,7 +241,7 @@ extract-headers stamps/extract-headers : downloads/$(AVR32HEADERS_ARCHIVE)
 
 .PHONY: install-headers
 install-headers stamps/install-headers : stamps/extract-headers stamps/install-final-gcc
-	cp -r avr-headers/$(TARGET) $(PREFIX)/$(TARGET)/include/$(TARGET)
+	cp -r atmel-headers-$(ATMEL_HEADER_REV)/$(TARGET) $(PREFIX)/$(TARGET)/include/$(TARGET)
 	mkdir -p stamps
 	touch stamps/install-headers
 
@@ -286,7 +272,7 @@ extract-newlib stamps/extract-newlib : downloads/$(NEWLIB_ARCHIVE)
 .PHONY: patch-newlib
 patch-newlib stamps/patch-newlib: stamps/extract-newlib stamps/extract-avr32patches
 	pushd newlib-$(NEWLIB_VERSION) ; \
-	for f in ../source/avr32/newlib/*.patch; do \
+	for f in ../avr32-patches/newlib/*.patch; do \
 	patch -N -p0 <$${f} ; \
 	done ; \
 	popd ;
@@ -360,7 +346,7 @@ extract-binutils stamps/extract-binutils: downloads/$(BINUTILS_ARCHIVE)
 .PHONY: patch-binutils
 patch-binutils stamps/patch-binutils: stamps/extract-binutils stamps/extract-avr32patches
 	pushd binutils-$(BINUTILS_VERSION) ; \
-	for f in ../source/avr32/binutils/*.patch; do \
+	for f in ../avr32-patches/binutils/*.patch; do \
 	patch -N -p0 <$${f} ; \
 	done ; \
 	popd ; \
@@ -462,7 +448,7 @@ extract-gcc stamps/extract-gcc: downloads/$(GCC_ARCHIVE)
 .PHONY: patch-gcc
 patch-gcc stamps/patch-gcc: stamps/extract-gcc stamps/extract-avr32patches
 	pushd gcc-$(GCC_VERSION) ; \
-	for f in ../source/avr32/gcc/*.patch; do \
+	for f in ../avr32-patches/gcc/*.patch; do \
 	patch -N -p0 <$${f} ; \
 	done ; \
 	patch -N -p0 <../patches/gcc/00-libstdc++-shared_ptr-without-rtti-bug-42019.patch ; \
@@ -593,17 +579,6 @@ mpfr: gmp mpfr-$(CS_BASE)/ sudomode
 	sudo -u $(SUDO_USER) $(MAKE) -j$(PROCS) all && \
 	$(MAKE) install
 
-cross-gdb: gdb-$(CS_BASE)/
-	mkdir -p build/gdb && cd build/gdb && \
-	pushd ../../gdb-$(CS_BASE) ; \
-	make clean ; \
-	popd ; \
-	../../gdb-$(CS_BASE)/configure --prefix="$(PREFIX)" --target=$(TARGET) --disable-werror && \
-	$(MAKE) -j$(PROCS) && \
-	$(MAKE) installdirs install-host install-target && \
-	mkdir -p "$(PREFIX)/man/man1" && \
-	cp ../../gdb-$(CS_BASE)/gdb/gdb.1 "$(PREFIX)/man/man1/arm-none-eabi-gdb.1"
-
 .PHONY : clean
 clean:
-	rm -rf build *-$(CS_BASE) binutils-* gcc-* gdb-* newlib-* mpc-* $(LOCAL_BASE) dfu-programmer-* autoconf-* automake-* stamps source supp avr-headers
+	rm -rf build *-$(CS_BASE) binutils-* gcc-* newlib-* mpc-* $(LOCAL_BASE) dfu-programmer-* autoconf-* automake-* stamps source supp avr32-patches atmel-headers-*
