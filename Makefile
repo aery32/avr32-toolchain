@@ -22,12 +22,12 @@
 
 #### PRIMARY TOOLCHAIN VERSIONS #####
 
-GCC_VERSION      = 4.4.3
+GCC_VERSION      = 4.4.7
 GDB_VERSION      = 6.7.1
-BINUTILS_VERSION = 2.22
+BINUTILS_VERSION = 2.23.1
 NEWLIB_VERSION   = 1.16.0
 DFU_VERSION      = 0.5.4
-AVR_PATCH_REV	 = 3.4.0.332
+AVR32_PATCH_REV	 = 3.4.2
 
 # Deprecated. Atmel has released the latest headers without the rev number.
 # Moreover AVR32 headers are now bundled with the AVR8 headers.
@@ -69,7 +69,7 @@ PKG_VERSION = "AVR 32 bit GNU Toolchain-$(AVR_PATCH_REV)-$(GIT_REV)"
 
 GCC_ARCHIVE = gcc-$(GCC_VERSION).tar.bz2
 GCC_URL = http://mirror.anl.gov/pub/gnu/gcc/gcc-$(GCC_VERSION)/$(GCC_ARCHIVE)
-GCC_MD5 = fe1ca818fc6d2caeffc9051fe67ff103
+GCC_MD5 = 295709feb4441b04e87dea3f1bab4281
 
 GDB_ARCHIVE = gdb-$(GDB_VERSION).tar.bz2
 GDB_URL = http://mirror.anl.gov/pub/gnu/gdb/$(GDB_ARCHIVE)
@@ -77,15 +77,15 @@ GDB_MD5 = 30a6bf36eded4ae5a152d7d71b86dc14
 
 BINUTILS_ARCHIVE = binutils-$(BINUTILS_VERSION).tar.bz2
 BINUTILS_URL = http://mirror.anl.gov/pub/gnu/binutils/$(BINUTILS_ARCHIVE)
-BINUTILS_MD5 = ee0f10756c84979622b992a4a61ea3f5
+BINUTILS_MD5 = 33adb18c3048d057ac58d07a3f1adb38
 
 NEWLIB_ARCHIVE = newlib-$(NEWLIB_VERSION).tar.gz
 NEWLIB_URL = ftp://sources.redhat.com/pub/newlib/$(NEWLIB_ARCHIVE)
 NEWLIB_MD5 = bf8f1f9e3ca83d732c00a79a6ef29bc4
 
-AVR32PATCHES_ARCHIVE = avr32-gnu-toolchain-$(AVR_PATCH_REV)-source.zip
-AVR32PATCHES_URL = http://www.atmel.com/Images/$(AVR32PATCHES_ARCHIVE)
-AVR32PATCHES_MD5 = 376926e2b4f889b4c422d4e1d3a7c4b6
+AVR32PATCHES_ARCHIVE = avr32-patches.tar.gz
+AVR32PATCHES_URL = http://distribute.atmel.no/tools/opensource/Atmel-AVR-Toolchain-$(AVR32_PATCH_REV)/avr32/$(AVR32PATCHES_ARCHIVE)
+AVR32PATCHES_MD5 = 99b2f4497d264c9200538bb1229fdef9
 
 AVR32HEADERS_ARCHIVE = avr-headers.zip
 AVR32HEADERS_URL = http://www.atmel.com/Images/$(AVR32HEADERS_ARCHIVE)
@@ -233,7 +233,7 @@ extract-avr32patches stamps/extract-avr32patches : downloads/$(AVR32PATCHES_ARCH
 	@(t1=`openssl md5 $< | cut -f 2 -d " " -` && \
 	[ "$$t1" = "$(AVR32PATCHES_MD5)" ] || \
 	( echo "Bad Checksum! Please remove the following file and retry: $<" && false ))
-	unzip -o $<
+	tar -xf $<
 	[ -d stamps ] || mkdir stamps
 	touch stamps/extract-avr32patches;
 
